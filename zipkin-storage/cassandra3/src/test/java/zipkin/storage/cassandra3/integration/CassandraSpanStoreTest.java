@@ -17,14 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.Test;
-import zipkin.Annotation;
-import zipkin.BinaryAnnotation;
-import zipkin.Endpoint;
-import zipkin.Span;
-import zipkin.TestObjects;
+import zipkin2.Annotation;
+import zipkin2.Endpoint;
+import zipkin2.Span;
+import zipkin2.TestObjects;
 import zipkin.internal.ApplyTimestampAndDuration;
 import zipkin.internal.Util;
-import zipkin.storage.QueryRequest;
+import zipkin2.storage.QueryRequest;
 import zipkin.storage.SpanStoreTest;
 import zipkin.storage.cassandra3.Cassandra3Storage;
 import zipkin.storage.cassandra3.InternalForTests;
@@ -39,7 +38,7 @@ abstract class CassandraSpanStoreTest extends SpanStoreTest {
   /** Cassandra indexing is performed separately, allowing the raw span to be stored unaltered. */
   @Test
   public void rawTraceStoredWithoutAdjustments() {
-    Span rawSpan = TestObjects.TRACE.get(0).toBuilder().timestamp(null).duration(null).build();
+    Span rawSpan = TestObjects.CLIENT_SPAN.toBuilder().timestamp(null).duration(null).build();
     accept(rawSpan);
 
     // At query time, timestamp and duration are added.

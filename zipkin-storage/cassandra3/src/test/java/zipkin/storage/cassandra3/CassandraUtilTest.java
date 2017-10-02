@@ -17,12 +17,11 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import zipkin.BinaryAnnotation;
 import zipkin.Constants;
-import zipkin.Span;
-import zipkin.TestObjects;
+import zipkin2.Span;
+import zipkin2.TestObjects;
 import zipkin.TraceKeys;
-import zipkin.storage.QueryRequest;
+import zipkin2.storage.QueryRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +32,7 @@ public class CassandraUtilTest {
 
   @Test
   public void annotationKeys_emptyRequest() {
-    assertThat(CassandraUtil.annotationKeys(QueryRequest.builder().lookback(86400000L).build()))
+    assertThat(CassandraUtil.annotationKeys(QueryRequest.newBuilder().lookback(86400000L).build()))
         .isEmpty();
   }
 
@@ -42,12 +41,12 @@ public class CassandraUtilTest {
     thrown.expect(IllegalArgumentException.class);
 
     CassandraUtil.annotationKeys(
-        QueryRequest.builder().lookback(86400000L).addAnnotation("sr").build());
+        QueryRequest.newBuilder().lookback(86400000L).addAnnotation("sr").build());
   }
 
   @Test
   public void annotationKeys() {
-    assertThat(CassandraUtil.annotationKeys(QueryRequest.builder()
+    assertThat(CassandraUtil.annotationKeys(QueryRequest.newBuilder()
         .lookback(86400000L)
         .serviceName("service")
         .addAnnotation(Constants.ERROR)
@@ -57,7 +56,7 @@ public class CassandraUtilTest {
 
   @Test
   public void annotationKeys_dedupes() {
-    assertThat(CassandraUtil.annotationKeys(QueryRequest.builder()
+    assertThat(CassandraUtil.annotationKeys(QueryRequest.newBuilder()
         .lookback(86400000L)
         .serviceName("service")
         .addAnnotation(Constants.ERROR)
@@ -69,11 +68,11 @@ public class CassandraUtilTest {
   public void annotationKeys_skipsCoreAndAddressAnnotations() throws Exception {
     Span span = TestObjects.TRACE.get(1);
 
-    assertThat(span.annotations)
-        .extracting(a -> a.value)
+    assertThat(span.annotations())
+        .extracting(a -> a.value())
         .matches(Constants.CORE_ANNOTATIONS::containsAll);
 
-    assertThat(span.binaryAnnotations)
+    assertThat(span.tags())
         .extracting(b -> b.key)
         .containsOnly(Constants.SERVER_ADDR, Constants.CLIENT_ADDR);
 

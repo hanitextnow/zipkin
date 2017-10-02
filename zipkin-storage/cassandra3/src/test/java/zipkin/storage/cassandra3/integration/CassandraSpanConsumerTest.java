@@ -23,10 +23,9 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.slf4j.LoggerFactory;
 import zipkin.Annotation;
-import zipkin.Span;
-import zipkin.TestObjects;
-import zipkin.internal.CallbackCaptor;
-import zipkin.storage.AsyncSpanConsumer;
+import zipkin2.Span;
+import zipkin2.TestObjects;
+import zipkin2.storage.SpanConsumer;
 import zipkin.storage.cassandra3.Cassandra3Storage;
 import zipkin.storage.cassandra3.InternalForTests;
 
@@ -68,26 +67,26 @@ abstract class CassandraSpanConsumerTest {
    */
   @Test
   public void doesntIndexSpansMissingDuration() {
-    Span span = Span.builder().traceId(1L).id(1L).name("get").duration(0L).build();
+    Span span = Span.newBuilder().traceId(1L).id(1L).name("get").duration(0L).build();
 
-    accept(storage().asyncSpanConsumer(), span);
+    accept(storage().spanConsumer(), span);
 
     assertThat(InternalForTests.rowCountForTraceByServiceSpan(storage())).isZero();
   }
 
   @Test
   public void logTimestampMissingOnClientSend() {
-    Span span = Span.builder().traceId(1L).parentId(1L).id(2L).name("query")
+    Span span = Span.newBuilder().traceId(1L).parentId(1L).id(2L).name("query")
       .addAnnotation(Annotation.create(0L, CLIENT_SEND, APP_ENDPOINT))
       .addAnnotation(Annotation.create(0L, CLIENT_RECV, APP_ENDPOINT)).build();
-    accept(storage().asyncSpanConsumer(), span);
+    accept(storage().spanConsumer(), span);
     verify(mockAppender).doAppend(considerSwitchStrategyLog());
   }
 
   @Test
   public void dontLogTimestampMissingOnMidTierServerSpan() {
     Span span = TestObjects.TRACE.get(0);
-    accept(storage().asyncSpanConsumer(), span);
+    accept(storage().spanConsumer(), span);
     verify(mockAppender, never()).doAppend(considerSwitchStrategyLog());
   }
 
@@ -122,7 +121,7 @@ abstract class CassandraSpanConsumerTest {
         .build();
     });
 
-    accept(storage().asyncSpanConsumer(), trace);
+    accept(storage().spanConsumer(), trace);
     assertThat(InternalForTests.rowCountForTraceByServiceSpan(storage()))
       .isGreaterThanOrEqualTo(4L);
     assertThat(InternalForTests.rowCountForTraceByServiceSpan(storage()))
@@ -139,10 +138,7 @@ abstract class CassandraSpanConsumerTest {
       .isGreaterThanOrEqualTo(201L);
   }
 
-  void accept(AsyncSpanConsumer consumer, Span... spans) {
-    // Blocks until the callback completes to allow read-your-writes consistency during tests.
-    CallbackCaptor<Void> captor = new CallbackCaptor<>();
-    consumer.accept(asList(spans), captor);
-    captor.get(); // block on result
+  void accept(SpanConsumer consumer, Span... spans) {
+    consumer.accept(asList(spans));
   }
 }
