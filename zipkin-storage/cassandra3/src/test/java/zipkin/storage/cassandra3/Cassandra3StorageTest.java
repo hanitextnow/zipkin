@@ -24,7 +24,7 @@ public class Cassandra3StorageTest {
   @Test
   public void check_failsInsteadOfThrowing() {
     CheckResult result =
-        Cassandra3Storage.builder().contactPoints("1.1.1.1").build().check();
+        Cassandra3Storage.newBuilder().contactPoints("1.1.1.1").build().check();
 
     assertThat(result.ok()).isFalse();
     assertThat(result.error())

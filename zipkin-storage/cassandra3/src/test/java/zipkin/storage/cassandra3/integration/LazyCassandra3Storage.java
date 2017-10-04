@@ -62,7 +62,7 @@ class LazyCassandra3Storage extends LazyCloseable<Cassandra3Storage> implements 
   }
 
   private Cassandra3Storage.Builder computeStorageBuilder() {
-    return Cassandra3Storage.builder()
+    return Cassandra3Storage.newBuilder()
       .contactPoints(contactPoints())
       .ensureSchema(true)
       .maxConnections(2)

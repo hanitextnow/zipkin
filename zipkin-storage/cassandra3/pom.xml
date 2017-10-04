@@ -62,6 +62,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>io.zipkin.java</groupId>
+      <artifactId>zipkin</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
     <!-- To test nuance of load balancing behavior -->
     <dependency>
       <groupId>org.mockito</groupId>

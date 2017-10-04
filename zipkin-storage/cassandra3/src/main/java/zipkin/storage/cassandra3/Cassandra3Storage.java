@@ -48,7 +48,7 @@ public final class Cassandra3Storage extends StorageComponent {
     Session create(Cassandra3Storage storage);
   }
 
-  public static Builder builder() {
+  public static Builder newBuilder() {
     return new Builder();
   }
 
